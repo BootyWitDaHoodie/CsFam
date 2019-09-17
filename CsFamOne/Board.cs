@@ -66,6 +66,24 @@ namespace CsFamOne
             return getRow;
         }
 
+        /// <summary>
+        /// Copy this board to multiple other boards
+        /// </summary>
+        /// <param name="boards">Boards to be copied to</param>
+        public void CopyBoard(params Board[] boards)
+        {
+            foreach (var board in boards)
+            {
+                for (int row = 0; row < Program.NumRows; row++)
+                {
+                    for (int col = 0; col < Program.NumColumns; col++)
+                    {
+                        board._field[row, col] = this._field[row, col];
+                    }
+                }
+            }
+        }
+
         public void SetField(int col, int row, char symbol)
         {
             this._field[row, col] = symbol;

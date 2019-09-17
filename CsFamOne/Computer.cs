@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Runtime.ConstrainedExecution;
 using System.Text;
 
@@ -35,7 +36,8 @@ namespace CsFamOne
                 return move;
             }
 
-            List<int> donts = TwoSteps(board);
+            List<int> donts = TwoSteps(board); // don't enable win opponent
+
             if (donts.Count != 0)
             {
                 foreach (var col in _bestColumns)
@@ -78,6 +80,22 @@ namespace CsFamOne
             }
 
             return donts;
+        }
+
+        private void AdvancedMoves(Board board, List<int> freeColumns)
+        {
+            List<char> winnerOfMoves = new List<char>();
+            foreach (var col in freeColumns)
+            {
+                winnerOfMoves.Add(EndWinnerRecursion(board, col));
+            }
+        }
+
+        private char EndWinnerRecursion(Board board, int col)
+        {
+            char endWinner;
+            endWinner = 'T'; // edit
+            return endWinner;
         }
 
         private int StartingMoves(Board board)
