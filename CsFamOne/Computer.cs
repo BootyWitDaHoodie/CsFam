@@ -85,16 +85,39 @@ namespace CsFamOne
         private void AdvancedMoves(Board board, List<int> freeColumns)
         {
             List<char> winnerOfMoves = new List<char>();
+            Board copiedBoard = new Board();
             foreach (var col in freeColumns)
             {
-                winnerOfMoves.Add(EndWinnerRecursion(board, col));
+                board.CopyBoard(copiedBoard);
+                winnerOfMoves.Add(EndWinnerRecursion(copiedBoard, col, this._symbol));
             }
         }
 
-        private char EndWinnerRecursion(Board board, int col)
+        private char EndWinnerRecursion(Board board, int col, char player)
         {
-            char endWinner;
-            endWinner = 'T'; // edit
+            board.SetFieldGetRow(col, player);
+            List<char> updatedFreeColumns = new List<Char>();
+            updatedFreeColumns = _check.LegalMoves(board);
+
+            char endWinner = _check.Winner(board);
+            if (endWinner != Program.None)
+            {
+                return endWinner;
+            }
+            else
+            {
+                foreach (var mov in updatedFreeColumns)
+                {
+                    if (player == this._symbol)
+                    {
+                        return EndWinnerRecursion(board, mov, this._opponent);
+                    }
+                    else
+                    {
+                        return EndWinnerRecursion(board, mov, this._symbol);
+                    }
+                }
+            }
             return endWinner;
         }
 
