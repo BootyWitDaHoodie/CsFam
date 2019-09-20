@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics.Contracts;
+using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Runtime.ConstrainedExecution;
 using System.Text;
 
@@ -12,6 +15,10 @@ namespace CsFamOne
         private char _opponent;
         private static Check _check = new Check();
         private static readonly List<int> _bestColumns = new List<int>() {3, 2, 4, 1, 5, 0, 6};
+        //private static List<int> pointsOfMoves;
+        private List<int> pointsOfMoves; // for pc vs pc
+        private int _currentColumn;
+
 
         public Computer(char symbolIn, char playerSymbol)
         {
@@ -19,11 +26,12 @@ namespace CsFamOne
             this._opponent = playerSymbol;
         }
 
-        public int BigBrainTime(Board board) // should return move
+        private int BigBrainTime(Board board) // should return move
         {
             int move;
             char[,] field = board.GetField();
             List<int> legalMoves = _check.LegalMoves(board);
+            //AdvancedMoves(board, legalMoves);
             move = WinMoves(board);
             if (move != 999)
             {
@@ -38,8 +46,11 @@ namespace CsFamOne
 
             List<int> donts = TwoSteps(board); // don't enable win opponent
 
+            int advancedMove = AdvancedMoves(board, legalMoves);
+
             if (donts.Count != 0)
             {
+                if (!donts.Contains(advancedMove)) return advancedMove;
                 foreach (var col in _bestColumns)
                 {
                     if (!donts.Contains(col) && legalMoves.Contains(col)) // make sure it's legal and proper move
@@ -58,6 +69,19 @@ namespace CsFamOne
             }
 
             return 0;
+        }
+
+        public int MakeMove(Board boardIn)
+        {
+            Board board = boardIn.CopyBoard();
+            int move = BigBrainTime(board);
+            DisplayMoveMessage(move);
+            return move;
+        }
+
+        private void DisplayMoveMessage(int move)
+        {
+            Console.WriteLine($"I put mine in col nr {move + 1}");
         }
 
         private List<int> TwoSteps(Board board) // returns list with moves not to make, because it enables a victory for the opponent
@@ -82,27 +106,54 @@ namespace CsFamOne
             return donts;
         }
 
-        private void AdvancedMoves(Board board, List<int> freeColumns)
+        private int AdvancedMoves(Board board, List<int> freeColumns)
         {
-            List<char> winnerOfMoves = new List<char>();
+            List<int> columnNumbers = new List<int>();
+            List<int> winnerScores = new List<int>();
             Board copiedBoard = new Board();
+            int score;
             foreach (var col in freeColumns)
             {
                 board.CopyBoard(copiedBoard);
-                winnerOfMoves.Add(EndWinnerRecursion(copiedBoard, col, this._symbol));
+                // list stuff
+                pointsOfMoves = new List<int>(); // make list/ refresh list
+                columnNumbers.Add(col);
+                _currentColumn = col;
+                EndWinnerRecursion(copiedBoard, col, this._symbol, 0);
+                score = pointsOfMoves.Sum() / pointsOfMoves.Count;
+                winnerScores.Add(score);
             }
+
+            int winningScore = winnerScores.Max();
+            int winningColumn = columnNumbers[winnerScores.IndexOf(winningScore)];
+            Console.WriteLine($"Winning score: {winningScore}, winning column: {winningColumn + 1}");
+            return winningColumn;
         }
 
-        private char EndWinnerRecursion(Board board, int col, char player)
-        {
-            board.SetFieldGetRow(col, player);
-            List<char> updatedFreeColumns = new List<Char>();
-            updatedFreeColumns = _check.LegalMoves(board);
+        private void EndWinnerRecursion(Board board, int col, char player, int count)
+        { // make void and edit list in property's
+            Board copiedBoard = new Board();
+            board.CopyBoard(copiedBoard);
+            copiedBoard.SetFieldGetRow(col, player);
+            count++; // added count to try limit turn time
 
-            char endWinner = _check.Winner(board);
-            if (endWinner != Program.None)
+            // update list of legal moves
+            List<int> updatedFreeColumns = new List<int>();
+            updatedFreeColumns = _check.LegalMoves(copiedBoard);
+
+            char endWinner = _check.Winner(copiedBoard);
+            if (endWinner != Program.None || count > 12)
             {
-                return endWinner;
+                //return endWinner; // add to list
+                if (endWinner == this._symbol) pointsOfMoves.Add(100);
+                else if (endWinner == this._opponent) pointsOfMoves.Add(-100);
+                else if (endWinner == Program.Tie) pointsOfMoves.Add(10);
+                else pointsOfMoves.Add(1);
+                if (endWinner != Program.None) Console.WriteLine($"Result of turn {count}, column {_currentColumn + 1} = {endWinner}");
+            }
+            else if (pointsOfMoves.Sum() > 1000 || pointsOfMoves.Sum() < -1000)
+            {
+                return;
             }
             else
             {
@@ -110,15 +161,14 @@ namespace CsFamOne
                 {
                     if (player == this._symbol)
                     {
-                        return EndWinnerRecursion(board, mov, this._opponent);
+                        EndWinnerRecursion(copiedBoard, mov, this._opponent, count);
                     }
                     else
                     {
-                        return EndWinnerRecursion(board, mov, this._symbol);
+                        EndWinnerRecursion(copiedBoard, mov, this._symbol, count);
                     }
                 }
             }
-            return endWinner;
         }
 
         private int StartingMoves(Board board)

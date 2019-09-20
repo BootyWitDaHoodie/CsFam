@@ -84,6 +84,13 @@ namespace CsFamOne
             }
         }
 
+        public Board CopyBoard()
+        {
+            Board board = new Board();
+            this.CopyBoard(board);
+            return board;
+        }
+
         public void SetField(int col, int row, char symbol)
         {
             this._field[row, col] = symbol;

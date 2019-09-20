@@ -24,6 +24,8 @@ namespace CsFamOne
             Player player1 = new Player(X);
             Player player2 = new Player(O);
             Computer computer1 = new Computer(O, X);
+            // added second pc
+            //Computer computer2 = new Computer(X, O);
             char turn = X;
             int move;
             while (check.Winner(board) == None)
@@ -31,11 +33,12 @@ namespace CsFamOne
                 if (turn == X)
                 {
                     move = playerHandler.Move(board, player1);
+                    //move = computer2.BigBrainTime(board);
                 }
                 else
                 {
                     //move = playerHandler.Move(board, player2);
-                    move = computer1.BigBrainTime(board);
+                    move = computer1.MakeMove(board);
                 }
 
                 board.SetFieldGetRow(move, turn);
