@@ -28,29 +28,39 @@ namespace CsFamOne
             //Computer computer2 = new Computer(X, O);
             char turn = X;
             int move;
-            while (check.Winner(board) == None)
+            int playAgain = 1;
+            while (playAgain > 0)
             {
-                if (turn == X)
+                while (check.Winner(board) == None)
                 {
-                    move = playerHandler.Move(board, player1);
-                    //move = computer2.BigBrainTime(board);
-                }
-                else
-                {
-                    //move = playerHandler.Move(board, player2);
-                    move = computer1.MakeMove(board);
+                    if (turn == X)
+                    {
+                        move = playerHandler.Move(board, player1);
+                        //move = computer2.BigBrainTime(board);
+                    }
+                    else
+                    {
+                        //move = playerHandler.Move(board, player2);
+                        move = computer1.MakeMove(board);
+                    }
+
+                    board.SetFieldGetRow(move, turn);
+                    turn = NextTurn(turn);
+                    board.DisplayBoard();
+                    Console.WriteLine();
                 }
 
-                board.SetFieldGetRow(move, turn);
-                turn = NextTurn(turn);
-                board.DisplayBoard();
-                Console.WriteLine();
-            }
-
-            char winner = check.Winner(board);
-            if (winner != Tie)
-            {
-                Console.WriteLine(winner + " won the game!");
+                char winner = check.Winner(board);
+                if (winner != Tie)
+                {
+                    Console.WriteLine(winner + " won the game!");
+                }
+                Console.WriteLine("Press any key to continue...");
+                Console.ReadKey();
+                Console.Write("\nEnter 0 if you want to exit, enter higher to play again: ");
+                playAgain = Console.Read();
+                player1 = new Player(O);
+                computer1 = new Computer(X, O);
             }
 
 

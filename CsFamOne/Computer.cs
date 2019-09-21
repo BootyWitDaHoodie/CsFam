@@ -60,15 +60,17 @@ namespace CsFamOne
                 }
             }
 
-            foreach (var col in _bestColumns) // last best thing
-            {
-                if (legalMoves.Contains(col))
-                {
-                    return col;
-                }
-            }
+            return advancedMove;
 
-            return 0;
+            //foreach (var col in _bestColumns) // last best thing
+            //{
+            //    if (legalMoves.Contains(col))
+            //    {
+            //        return col;
+            //    }
+            //}
+
+            //return 0;
         }
 
         public int MakeMove(Board boardIn)
@@ -123,11 +125,21 @@ namespace CsFamOne
                 score = pointsOfMoves.Sum() / pointsOfMoves.Count;
                 winnerScores.Add(score);
             }
-
+            //DisplayLists(winnerScores, columnNumbers);
             int winningScore = winnerScores.Max();
             int winningColumn = columnNumbers[winnerScores.IndexOf(winningScore)];
             Console.WriteLine($"Winning score: {winningScore}, winning column: {winningColumn + 1}");
             return winningColumn;
+        }
+
+        private void DisplayLists(List<int> scores, List<int> columns)
+        {
+            Console.WriteLine();
+            foreach (var score in scores)
+            {
+                Console.WriteLine($"Column: {columns[scores.IndexOf(score)]} with {score} points");
+            }
+            Console.WriteLine();
         }
 
         private void EndWinnerRecursion(Board board, int col, char player, int count)
@@ -151,8 +163,9 @@ namespace CsFamOne
                 else pointsOfMoves.Add(1);
                 if (endWinner != Program.None) Console.WriteLine($"Result of turn {count}, column {_currentColumn + 1} = {endWinner}");
             }
-            else if (pointsOfMoves.Sum() > 1000 || pointsOfMoves.Sum() < -1000)
+            else if (pointsOfMoves.Sum() > 1000 || pointsOfMoves.Sum() < -1000) // if doesnt do right alter these, maybe remove > 1000
             {
+                Console.WriteLine($"Not added, points: {pointsOfMoves.Sum()}");
                 return;
             }
             else
